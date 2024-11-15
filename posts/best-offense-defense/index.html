@@ -190,13 +190,306 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p>We all know that some NFL teams have, or have had some outstanding offenses or defenses throughout recent years and the past, but of of these elite groups, which ones help their teams succeed the most?</p>
+<p>When watching an NFL football game, everyone loves to witness the highlight plays made by an offense or the hard hits that get laid by the defense. With this, there is sometimes that question lingering about which side of the ball matters more to their team. We all know that some NFL teams have, or have had some outstanding offenses or defenses throughout recent years and the past, but of these elite groups, which ones help their teams succeed the most? The first thing to look at when searching for elite offenses and defenses, is the points scored and points allowed by certain groups.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nflverse)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>games <span class="ot">&lt;-</span> <span class="fu">load_schedules</span>(<span class="at">seasons =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(games)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>games <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(season <span class="sc">==</span> <span class="dv">2019</span><span class="sc">:</span><span class="dv">2023</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: There was 1 warning in `filter()`.
+ℹ In argument: `season == 2019:2023`.
+Caused by warning in `season == 2019:2023`:
+! longer object length is not a multiple of shorter object length</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── nflverse games and schedules ────────────────────────────────────────────────</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>ℹ Data updated: 2024-11-15 17:38:28 CST</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>team_points <span class="ot">&lt;-</span> games <span class="sc">|&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(season, home_team, away_team, home_score, away_score) <span class="sc">|&gt;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">team =</span> <span class="fu">c</span>(home_team, away_team),</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">points_scored =</span> <span class="fu">c</span>(home_score, away_score),</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">points_allowed =</span> <span class="fu">c</span>(away_score, home_score),</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(team) <span class="sc">|&gt;</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_points_scored =</span> <span class="fu">sum</span>(points_scored, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_points_allowed =</span> <span class="fu">sum</span>(points_allowed, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+dplyr 1.1.0.
+ℹ Please use `reframe()` instead.
+ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+  always returns an ungrouped data frame and adjust accordingly.</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>team_colors <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"ARI"</span> <span class="ot">=</span> <span class="st">"#97233F"</span>, <span class="st">"ATL"</span> <span class="ot">=</span> <span class="st">"#A71930"</span>, <span class="st">"BAL"</span> <span class="ot">=</span> <span class="st">"#241773"</span>, <span class="st">"BUF"</span> <span class="ot">=</span> <span class="st">"#00338D"</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"CAR"</span> <span class="ot">=</span> <span class="st">"#0085CA"</span>, <span class="st">"CHI"</span> <span class="ot">=</span> <span class="st">"#0B162A"</span>, <span class="st">"CIN"</span> <span class="ot">=</span> <span class="st">"#FB4F14"</span>, <span class="st">"CLE"</span> <span class="ot">=</span> <span class="st">"#311D00"</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"DAL"</span> <span class="ot">=</span> <span class="st">"#003594"</span>, <span class="st">"DEN"</span> <span class="ot">=</span> <span class="st">"#FB4F14"</span>, <span class="st">"DET"</span> <span class="ot">=</span> <span class="st">"#0076B6"</span>, <span class="st">"GB"</span> <span class="ot">=</span> <span class="st">"#203731"</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"HOU"</span> <span class="ot">=</span> <span class="st">"#03202F"</span>, <span class="st">"IND"</span> <span class="ot">=</span> <span class="st">"#002C5F"</span>, <span class="st">"JAX"</span> <span class="ot">=</span> <span class="st">"#006778"</span>, <span class="st">"KC"</span> <span class="ot">=</span> <span class="st">"#E31837"</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"LAC"</span> <span class="ot">=</span> <span class="st">"#0073CF"</span>, <span class="st">"LAR"</span> <span class="ot">=</span> <span class="st">"#003594"</span>, <span class="st">"MIA"</span> <span class="ot">=</span> <span class="st">"#008E97"</span>, <span class="st">"MIN"</span> <span class="ot">=</span> <span class="st">"#4F2683"</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"NE"</span> <span class="ot">=</span> <span class="st">"#002244"</span>, <span class="st">"NO"</span> <span class="ot">=</span> <span class="st">"#D3BC8D"</span>, <span class="st">"NYG"</span> <span class="ot">=</span> <span class="st">"#0B2265"</span>, <span class="st">"NYJ"</span> <span class="ot">=</span> <span class="st">"#125740"</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"LV"</span> <span class="ot">=</span> <span class="st">"#000000"</span>, <span class="st">"PHI"</span> <span class="ot">=</span> <span class="st">"#004C54"</span>, <span class="st">"PIT"</span> <span class="ot">=</span> <span class="st">"#FFB612"</span>, <span class="st">"SF"</span> <span class="ot">=</span> <span class="st">"#AA0000"</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"SEA"</span> <span class="ot">=</span> <span class="st">"#002244"</span>, <span class="st">"TB"</span> <span class="ot">=</span> <span class="st">"#D50A0A"</span>, <span class="st">"TEN"</span> <span class="ot">=</span> <span class="st">"#4B92DB"</span>, <span class="st">"WAS"</span> <span class="ot">=</span> <span class="st">"#773141"</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>team_points <span class="ot">&lt;-</span> team_points <span class="sc">|&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">color =</span> team_colors[team])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(team_points, <span class="fu">aes</span>(<span class="at">x =</span> total_points_allowed, <span class="at">y =</span> total_points_scored)) <span class="sc">+</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> color), <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> team, <span class="at">color =</span> color), <span class="at">vjust =</span><span class="sc">-</span><span class="dv">1</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_identity</span>() <span class="sc">+</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Since 2019, most teams tend to follow a similar trend"</span>,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Except for a couple of outliers..."</span>,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"Source: nflverse | By: Tysen Christie"</span>,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Total Points Allowed"</span>,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Total Points Scored"</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_gray</span>() <span class="sc">+</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title.x =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 4 rows containing missing values or values outside the scale range
+(`geom_point()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>After visualizing this graphic, right off the bat you can point out some teams that have had great, and no so great offenses and defenses overtime. This could make you wonder, which of these teams have actually been successful? There have been many times where a team will have a top offense or defense in the league, but then lack tremendously in skill, depth, you name it on the other side of the ball. If you need an example, the 2022 Miami Dolphins. However, many things can happen during the regular season such as injuries or teams just having an off game, so their are many factors that could possibly go into poor performances by a certain side of the ball. Now I know everyone loves to see the flashy highlight plays made by star running backs and receivers, but people also love to watch defenses make highlight plays too, and sometimes those plays are some of the most impactful plays of the game or even season.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggtext)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nflreadr)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">packageVersion</span>(<span class="st">"dplyr"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] '1.1.4'</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>defense <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"2023defense(sheet1).csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(defense)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(defense, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(Tm,TO), <span class="at">y =</span> TO)) <span class="sc">+</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">fill =</span> <span class="st">"steelblue"</span>) <span class="sc">+</span> </span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Turnovers can pick apart the elite and the average defenses."</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Great defenses typically force many turnovers."</span>,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"Source: Pro Football Reference | By: Tysen Christie"</span>,</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Team"</span>,</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Total Turnovers Forced in 2023"</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">hjust =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">10</span>, <span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">8</span>),</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title.x =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>)</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA
+Warning in mean.default(X[[i]], ...): argument is not numeric or logical:
+returning NA</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Thinking back to my main point of offenses and defenses making their teams “successful”, right away you can make some assumptions based off this graph. The Carolina Panthers, Tennessee Titans, and LA Rams clearly forced the least amount of turnovers last season, so did this affect their teams as a whole in any sort of way? Well, without doing any research, the Panthers and Titans were two bottom five teams in the entire NFL last year, but the Rams….. actually made the playoffs! One point that this could make us think about is that maybe offense is more important than defense? Well, maybe that is the case for the Rams at least considering they have two stellar wide receivers in Puka Nacua and Cooper Kupp and a second year running back in Kyren Williams. Don’t let me forget to mention that this Rams offense is also powered by veteran quarterback Matt Stafford as well. Aside from that, if you check out the defensive side of the ball when compared to the offensive side, you can make even more assumptions about certain teams.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>standings <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"standings(Sheet1).csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(standings)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>                     m  W  L  W.L.  PF  PA   PD  MoV  SoS  SRS OSRS DSRS
+1       Buffalo Bills* 11  6 0.647 451 311  140  8.2 -1.8  6.5  4.1  2.3
+2      Miami Dolphins+ 11  6 0.647 496 391  105  6.2 -1.8  4.4  7.6 -3.1
+3        New York Jets  7 10 0.412 268 355  -87 -5.1 -0.6 -5.8 -6.7  0.9
+4 New England Patriots  4 13 0.235 236 366 -130 -7.6 -0.2 -7.9 -8.5  0.6
+5    Baltimore Ravens* 13  4 0.765 483 280  203 11.9  1.2 13.2  6.7  6.5
+6    Cleveland Browns+ 11  6 0.647 396 362   34  2.0  1.3  3.3  2.4  0.9</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(standings, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(m, PD), <span class="at">y =</span> PD, <span class="at">size =</span> <span class="fu">abs</span>(PD), <span class="at">color =</span> PD)) <span class="sc">+</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_size_continuous</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">10</span>)) <span class="sc">+</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Some offenses and defenses merge very well together"</span>,</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Others can weigh down the other side"</span>,</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Team"</span>,</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Point Differential"</span>,</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"Source: Pro Football Reference | By: Tysen Christie"</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_grey</span>() <span class="sc">+</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>     <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">hjust =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">10</span>, <span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">8</span>),</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title.x =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>)</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>It is no surprise that the LA Rams are here on this graphic with a positive point differential. Now it may not be quite as positive as some may have thought after seeing the Rams defensive turnovers, despite still making the playoffs, but there are many things that could play into that. For example, the Rams might not be getting very many turnovers on defense, but maybe they are also not turning the ball over much on offense either. Another thing to notice is that the Ravens had the highest point differential last year, and they were also the team with the most turnovers on the other graph. Most of the time these two things can go hand in hand with each other. However, back to the main point, the Chiefs are also in the same boat as the Rams. They didn’t force very many turnovers last year, but they were ranked very high in point differential and they also ended up winning the Super Bowl that same year. I think that there can still be many arguments made about which side of the ball helps their team succeed more, but I think these graphs do an outstanding job in showing that productive offenses in past years have done a great job at carrying the weight of their not so outstanding defenses.</p>
 
 
 
